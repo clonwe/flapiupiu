@@ -129,7 +129,7 @@ function fazColisao(flappyBird, chao) {
 
 function criaFlappyBird() {
   const flappyBird_red = {
-    spriteX: 0,
+    spriteX: 38,
     spriteY: 0,
     largura: 33,
     altura: 24,
@@ -146,21 +146,42 @@ function criaFlappyBird() {
     y: 50,
     pulo: 3.2,
   };
+  const flappyBird_blue = {
+    spriteX: 76,
+    spriteY: 0,
+    largura: 33,
+    altura: 24,
+    x: 10,
+    y: 50,
+    pulo: 3.2,
+  };
+
+  movimentos = [
+    { spriteX: 0, spriteY: 0, }, // asa pra cima
+    { spriteX: 0, spriteY: 26, }, // asa no meio 
+    { spriteX: 0, spriteY: 52, }, // asa pra baixo
+    { spriteX: 0, spriteY: 26, }, // asa no meio 
+  ];
 
   const flappyBird = {
-    flapp : [flappyBird_red,flappyBird_yellow],
-
+    flapp : [flappyBird_red,flappyBird_yellow,flappyBird_blue],
+    fig : Math.floor(Math.random() *3) ,
+       
+    gravidade: 0.20,
+    velocidade: 0,
+    
+    frameAtual: 0,
+    
     pula() {
 //      console.log('devo pular');
 //      console.log('[antes]', flappyBird.velocidade);
-    flappyBird.velocidade =  - flappyBird.flapp[0].pulo;
+    flappyBird.velocidade =  - flappyBird.flapp[flappyBird.fig].pulo;
 //      console.log('[depois]', flappyBird.velocidade);
     },
-    gravidade: 0.20,
-    velocidade: 0,
- 
+
+      
     atualiza() {
-      if(fazColisao(flappyBird.flapp[0], globais.chao)) {
+      if(fazColisao(flappyBird.flapp[flappyBird.fig], globais.chao)) {
         console.log('Fez colisao');
         som_HIT.play();
 
@@ -171,17 +192,9 @@ function criaFlappyBird() {
       }
   
       flappyBird.velocidade = flappyBird.velocidade + flappyBird.gravidade;
-      flappyBird.flapp[0].y = flappyBird.flapp[0].y + flappyBird.velocidade;
+      flappyBird.flapp[flappyBird.fig].y = flappyBird.flapp[flappyBird.fig].y + flappyBird.velocidade;
     },
-    movimentos: [
-      { spriteX: 0, spriteY: 0, }, // asa pra cima
-      { spriteX: 0, spriteY: 26, }, // asa no meio 
-      { spriteX: 0, spriteY: 52, }, // asa pra baixo
-      { spriteX: 0, spriteY: 26, }, // asa no meio 
-    ],
-
-    frameAtual: 0,
-   
+    
     atualizaOFrameAtual() {     
       const intervaloDeFrames = 10;
       const passouOIntervalo = frames % intervaloDeFrames === 0;
@@ -190,7 +203,7 @@ function criaFlappyBird() {
       if(passouOIntervalo) {
         const baseDoIncremento = 1;
         const incremento = baseDoIncremento + flappyBird.frameAtual;
-        const baseRepeticao = flappyBird.movimentos.length;
+        const baseRepeticao = movimentos.length;
         flappyBird.frameAtual = incremento % baseRepeticao
       }
         // console.log('[incremento]', incremento);
@@ -199,15 +212,16 @@ function criaFlappyBird() {
     },
     desenha() {
       flappyBird.atualizaOFrameAtual();
-      const { spriteX, spriteY } = flappyBird.movimentos[flappyBird.frameAtual];
+      let { spriteX, spriteY } = movimentos[flappyBird.frameAtual];
+      spriteX = flappyBird.flapp[flappyBird.fig].spriteX;
 //      console.log('movimentos', flappyBird.movimentos), //DEBUG
 
       contexto.drawImage(
         sprites,
         spriteX, spriteY, // Sprite X, Sprite Y
-        flappyBird.flapp[0].largura, flappyBird.flapp[0].altura, // Tamanho do recorte na sprite
-        flappyBird.flapp[0].x, flappyBird.flapp[0].y,
-        flappyBird.flapp[0].largura, flappyBird.flapp[0].altura,
+        flappyBird.flapp[flappyBird.fig].largura, flappyBird.flapp[flappyBird.fig].altura, // Tamanho do recorte na sprite
+        flappyBird.flapp[flappyBird.fig].x, flappyBird.flapp[flappyBird.fig].y,
+        flappyBird.flapp[flappyBird.fig].largura, flappyBird.flapp[flappyBird.fig].altura,
       );
     }
   }
@@ -346,7 +360,7 @@ function criaCanos() {
     },
 
     passandoPeloCano(par) {
-      if(globais.flappyBird.flapp[0].x == par.x) {
+      if(globais.flappyBird.flapp[globais.flappyBird.fig].x == par.x) {
         return true
       }
       else return false
@@ -363,11 +377,12 @@ function criaCanos() {
     } ,
 
     temColisaoComOFlappyBird(par) {
-      const cabecaDoFlappy = globais.flappyBird.flapp[0].y;
-      const peDoFlappy = globais.flappyBird.flapp[0].y + globais.flappyBird.flapp[0].altura;
+      
+      const cabecaDoFlappy = globais.flappyBird.flapp[globais.flappyBird.fig].y;
+      const peDoFlappy = globais.flappyBird.flapp[globais.flappyBird.fig].y + globais.flappyBird.flapp[globais.flappyBird.fig].altura;
       
 
-      if(globais.flappyBird.flapp[0].x >= par.x) {
+      if(globais.flappyBird.flapp[globais.flappyBird.fig].x >= par.x) {
   
         if(cabecaDoFlappy <= par.canoCeu.y) {
           return true;
